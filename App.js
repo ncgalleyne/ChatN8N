@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { SafeAreaView, View, Text, TextInput, Button, FlatList, StyleSheet } from "react-native";
+import { SafeAreaView, View, Text, TextInput, FlatList, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Image } from "react-native";
 import axios from "axios";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -25,16 +25,46 @@ function ConnectScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.label}>Enter Server URL:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder=""
-        value={serverUrl}
-        onChangeText={setServerUrl}
-      />
-      <Button title="Connect" onPress={connectToServer} />
-      {error && <Text style={styles.error}>{error}</Text>}
+    <SafeAreaView style={[styles.container, styles.connectBg]}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 24 : 0}
+      >
+        <View style={styles.connectContent}>
+          <Text style={styles.connectTitle}>Connect to Server</Text>
+
+          <View style={styles.illustrationWrap}>
+            {/* Optional illustration. If you provide an asset, drop it into an assets/ folder and update the require path below. */}
+            {/* <Image source={require("./assets/connect-illustration.png")} style={styles.illustration} resizeMode="contain" /> */}
+            <View style={styles.illustrationPlaceholder} />
+          </View>
+
+          <View style={styles.inputFieldWrap}>
+            <Text style={styles.inputIcon}>🔗</Text>
+            <TextInput
+              style={styles.inputField}
+              placeholder="Enter Server URL"
+              placeholderTextColor="#cbd5e1"
+              autoCapitalize="none"
+              autoCorrect={false}
+              value={serverUrl}
+              onChangeText={setServerUrl}
+            />
+          </View>
+
+          {error && <Text style={styles.errorLight}>{error}</Text>}
+
+          <TouchableOpacity style={styles.connectBtn} onPress={connectToServer} activeOpacity={0.8}>
+            <Text style={styles.connectBtnText}>Connect</Text>
+          </TouchableOpacity>
+
+          <View style={styles.linkRow}>
+            <Text style={styles.linkTextDim}>Need help?</Text>
+            <Text style={styles.linkText}> Learn more</Text>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -121,7 +151,38 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
-  label: { fontSize: 16, marginBottom: 8 },
+  // Connect screen styles
+  connectBg: { backgroundColor: "#0a1f7a" },
+  connectContent: { flex: 1, justifyContent: "space-between", paddingVertical: 24 },
+  connectTitle: { fontSize: 32, fontWeight: "700", color: "#ffffff", marginTop: 8 },
+  illustrationWrap: { alignItems: "center", marginTop: 8 },
+  illustration: { width: "100%", height: 180 },
+  illustrationPlaceholder: { width: "100%", height: 180, backgroundColor: "#0f2aa8", borderRadius: 12 },
+  inputFieldWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#3b5bdb",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginTop: 16,
+  },
+  inputIcon: { fontSize: 18, color: "#e2e8f0", marginRight: 8 },
+  inputField: { flex: 1, color: "#ffffff", fontSize: 16 },
+  connectBtn: {
+    backgroundColor: "#ffffff",
+    borderRadius: 28,
+    paddingVertical: 14,
+    alignItems: "center",
+    marginTop: 16,
+  },
+  connectBtnText: { color: "#0a1f7a", fontSize: 18, fontWeight: "600" },
+  linkRow: { flexDirection: "row", justifyContent: "center", marginTop: 8 },
+  linkTextDim: { color: "#cbd5e1" },
+  linkText: { color: "#ffffff", fontWeight: "600" },
+  // Shared
   title: { fontSize: 24, fontWeight: "600", marginBottom: 12, textAlign: "center" },
   chatBox: {
     flex: 1,
@@ -139,4 +200,5 @@ const styles = StyleSheet.create({
   input: { borderWidth: 1, borderColor: "#ccc", borderRadius: 8, padding: 8, flex: 1, marginRight: 8 },
   inputRow: { flexDirection: "row", alignItems: "center", marginTop: 8 },
   error: { color: "red", marginTop: 8 },
+  errorLight: { color: "#fecaca", marginTop: 8 },
 });
