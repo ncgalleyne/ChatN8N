@@ -5,15 +5,18 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ActivityIndicator } from "react-native";
 
 const Stack = createNativeStackNavigator();
 
 function ConnectScreen({ navigation }) {
   const [serverUrl, setServerUrl] = useState("");
   const [error, setError] = useState(null);
+  const [isConnecting, setIsConnecting] = useState(false);
 
   const connectToServer = async () => {
     try {
+      setIsConnecting(true);
       const response = await axios.post(serverUrl, { chatInput: { message: "Ping" } }, {
         headers: { "Content-Type": "application/json" },
       });
@@ -23,6 +26,8 @@ function ConnectScreen({ navigation }) {
       }
     } catch (err) {
       setError("Failed to connect to server");
+    } finally {
+      setIsConnecting(false);
     }
   };
 
@@ -58,7 +63,11 @@ function ConnectScreen({ navigation }) {
           {error && <Text style={styles.errorLight}>{error}</Text>}
 
           <TouchableOpacity style={styles.connectBtn} onPress={connectToServer} activeOpacity={0.8}>
-            <Text style={styles.connectBtnText}>Connect</Text>
+            {isConnecting ? (
+              <ActivityIndicator size="small" color="#ffffff" />
+            ) : (
+              <Text style={styles.connectBtnText}>Connect</Text>
+            )}
           </TouchableOpacity>
 
           <View style={styles.linkRow}>
@@ -147,6 +156,7 @@ function ChatScreen({ route }) {
             editable={!loading}
             returnKeyType="send"
             onSubmitEditing={sendMessage}
+            disabled={loading}
           />
           <TouchableOpacity style={styles.sendBtn} onPress={sendMessage} disabled={loading || !message.trim()}>
             <Text style={styles.sendBtnText}>Send</Text>
