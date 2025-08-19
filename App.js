@@ -41,10 +41,9 @@ function ConnectScreen({ navigation }) {
         <View style={styles.connectContent}>
           <Text style={styles.connectTitle}>Connect to Server</Text>
 
-          <View style={styles.illustrationWrap}>
+          <View>
             {/* Optional illustration. If you provide an asset, drop it into an assets/ folder and update the require path below. */}
-            {/* <Image source={require("./assets/connect-illustration.png")} style={styles.illustration} resizeMode="contain" /> */}
-            <View style={styles.illustrationPlaceholder} />
+            <Image source={require("./assets/ChatAppIcon.png")} style={styles.illustration} resizeMode="contain" />
           </View>
 
           <View style={styles.inputFieldWrap}>
@@ -64,7 +63,7 @@ function ConnectScreen({ navigation }) {
 
           <TouchableOpacity style={styles.connectBtn} onPress={connectToServer} activeOpacity={0.8}>
             {isConnecting ? (
-              <ActivityIndicator size="small" color="#ffffff" />
+              <ActivityIndicator size="small" color="#000000" />
             ) : (
               <Text style={styles.connectBtnText}>Connect</Text>
             )}
