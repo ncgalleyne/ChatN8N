@@ -132,7 +132,9 @@ function ChatScreen({ route }) {
           onChangeText={setMessage}
           editable={!loading}
         />
-        <Button title="Send" onPress={sendMessage} disabled={loading || !message.trim()} />
+        <TouchableOpacity style={styles.sendBtn} onPress={sendMessage} disabled={loading || !message.trim()}>
+          <Text style={styles.sendBtnText}>Send</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
