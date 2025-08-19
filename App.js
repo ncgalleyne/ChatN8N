@@ -44,11 +44,14 @@ function ChatScreen({ route }) {
   const [message, setMessage] = useState("");
   const [chat, setChat] = useState([]);
 
+  const [loading, setLoading] = useState(false);
+
   const sendMessage = async () => {
     if (!message.trim()) return;
 
     const userMessage = { id: Date.now().toString(), sender: "You", text: message };
     setChat((prev) => [...prev, userMessage]);
+    setLoading(true);
 
     try {
       const response = await axios.post(serverUrl, { chatInput: { message } }, {
@@ -65,30 +68,41 @@ function ChatScreen({ route }) {
     } catch (err) {
       const errorMsg = { id: Date.now().toString() + "_err", sender: "Error", text: "Failed to send message" };
       setChat((prev) => [...prev, errorMsg]);
+    } finally {
+      setMessage("");
+      setLoading(false);
     }
-
-    setMessage("");
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <FlatList
-        data={chat}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <Text style={item.sender === "You" ? styles.userMsg : styles.serverMsg}>
-            {item.sender}: {item.text}
-          </Text>
-        )}
-      />
+      <Text style={styles.title}>MCP Chat</Text>
+
+      <View style={styles.chatBox}>
+        <FlatList
+          data={chat}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingVertical: 8 }}
+          renderItem={({ item }) => (
+            <View style={[styles.msgRow, item.sender === "You" ? { alignItems: "flex-end" } : { alignItems: "flex-start" }]}>
+              <View style={item.sender === "You" ? styles.msgBubbleUser : styles.msgBubbleServer}>
+                <Text>{item.text}</Text>
+              </View>
+            </View>
+          )}
+        />
+        {loading && <Text style={styles.loadingText}>Thinking...</Text>}
+      </View>
+
       <View style={styles.inputRow}>
         <TextInput
           style={styles.input}
-          placeholder="Type a message..."
+          placeholder="Ask something..."
           value={message}
           onChangeText={setMessage}
+          editable={!loading}
         />
-        <Button title="Send" onPress={sendMessage} />
+        <Button title="Send" onPress={sendMessage} disabled={loading || !message.trim()} />
       </View>
     </SafeAreaView>
   );
@@ -108,9 +122,21 @@ export default function App() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
   label: { fontSize: 16, marginBottom: 8 },
+  title: { fontSize: 24, fontWeight: "600", marginBottom: 12, textAlign: "center" },
+  chatBox: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingTop: 8,
+    backgroundColor: "#f9fafb",
+  },
+  msgRow: { width: "100%", marginVertical: 4 },
+  msgBubbleUser: { backgroundColor: "#bfdbfe", paddingVertical: 8, paddingHorizontal: 12, borderRadius: 10, maxWidth: "85%" },
+  msgBubbleServer: { backgroundColor: "#d1fae5", paddingVertical: 8, paddingHorizontal: 12, borderRadius: 10, maxWidth: "85%" },
+  loadingText: { color: "#9ca3af", paddingVertical: 6, textAlign: "center" },
   input: { borderWidth: 1, borderColor: "#ccc", borderRadius: 8, padding: 8, flex: 1, marginRight: 8 },
   inputRow: { flexDirection: "row", alignItems: "center", marginTop: 8 },
-  userMsg: { alignSelf: "flex-end", backgroundColor: "#d1f7c4", padding: 8, borderRadius: 6, marginVertical: 2 },
-  serverMsg: { alignSelf: "flex-start", backgroundColor: "#f0f0f0", padding: 8, borderRadius: 6, marginVertical: 2 },
   error: { color: "red", marginTop: 8 },
 });
