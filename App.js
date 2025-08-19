@@ -97,7 +97,8 @@ function ChatScreen({ route }) {
     setLoading(true);
 
     try {
-      const response = await axios.post(serverUrl, { chatInput: { message } }, {
+      setMessage("");
+      const response = await axios.post(serverUrl, { chatInput: { message: userMessage.text } }, {
         headers: { "Content-Type": "application/json" },
       });
       const { output } = response.data; 
@@ -112,7 +113,6 @@ function ChatScreen({ route }) {
       const errorMsg = { id: Date.now().toString() + "_err", sender: "Error", text: "Failed to send message" };
       setChat((prev) => [...prev, errorMsg]);
     } finally {
-      setMessage("");
       setLoading(false);
     }
   };
@@ -132,7 +132,6 @@ function ChatScreen({ route }) {
             data={chat}
             keyExtractor={(item) => item.id}
             keyboardShouldPersistTaps="handled"
-            inverted
             contentContainerStyle={{ paddingVertical: 8, flexGrow: 1 }}
             onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
             renderItem={({ item }) => (
