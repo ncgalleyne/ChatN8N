@@ -3,6 +3,8 @@ import { SafeAreaView, View, Text, TextInput, FlatList, StyleSheet, KeyboardAvoi
 import axios from "axios";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useHeaderHeight } from "@react-navigation/elements";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Stack = createNativeStackNavigator();
 
@@ -76,6 +78,8 @@ function ChatScreen({ route }) {
 
   const [loading, setLoading] = useState(false);
   const flatListRef = useRef(null);
+  const headerHeight = useHeaderHeight();
+  const insets = useSafeAreaInsets();
 
   const sendMessage = async () => {
     if (!message.trim()) return;
@@ -112,7 +116,7 @@ function ChatScreen({ route }) {
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 24 : 0}
+        keyboardVerticalOffset={Platform.OS === "ios" ? headerHeight + (insets?.bottom || 0) + 32 : 0}
       >
         <View style={styles.chatBox}>
           <FlatList
@@ -120,7 +124,8 @@ function ChatScreen({ route }) {
             data={chat}
             keyExtractor={(item) => item.id}
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ paddingVertical: 8 }}
+            inverted
+            contentContainerStyle={{ paddingVertical: 8, flexGrow: 1 }}
             onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
             renderItem={({ item }) => (
               <View style={[styles.msgRow, item.sender === "You" ? { alignItems: "flex-end" } : { alignItems: "flex-start" }]}>
@@ -133,7 +138,7 @@ function ChatScreen({ route }) {
           {loading && <Text style={styles.loadingText}>Thinking...</Text>}
         </View>
 
-        <View style={styles.inputRow}>
+        <View style={[styles.inputRow, { paddingBottom: (insets?.bottom || 8) }] }>
           <TextInput
             style={styles.input}
             placeholder="Ask something..."
