@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { SafeAreaView, View, Text, TextInput, FlatList, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Image } from "react-native";
 import axios from "axios";
 import { NavigationContainer } from "@react-navigation/native";
@@ -75,6 +75,7 @@ function ChatScreen({ route }) {
   const [chat, setChat] = useState([]);
 
   const [loading, setLoading] = useState(false);
+  const flatListRef = useRef(null);
 
   const sendMessage = async () => {
     if (!message.trim()) return;
@@ -108,34 +109,45 @@ function ChatScreen({ route }) {
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>MCP Chat</Text>
 
-      <View style={styles.chatBox}>
-        <FlatList
-          data={chat}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingVertical: 8 }}
-          renderItem={({ item }) => (
-            <View style={[styles.msgRow, item.sender === "You" ? { alignItems: "flex-end" } : { alignItems: "flex-start" }]}>
-              <View style={item.sender === "You" ? styles.msgBubbleUser : styles.msgBubbleServer}>
-                <Text>{item.text}</Text>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 24 : 0}
+      >
+        <View style={styles.chatBox}>
+          <FlatList
+            ref={flatListRef}
+            data={chat}
+            keyExtractor={(item) => item.id}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ paddingVertical: 8 }}
+            onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+            renderItem={({ item }) => (
+              <View style={[styles.msgRow, item.sender === "You" ? { alignItems: "flex-end" } : { alignItems: "flex-start" }]}>
+                <View style={item.sender === "You" ? styles.msgBubbleUser : styles.msgBubbleServer}>
+                  <Text>{item.text}</Text>
+                </View>
               </View>
-            </View>
-          )}
-        />
-        {loading && <Text style={styles.loadingText}>Thinking...</Text>}
-      </View>
+            )}
+          />
+          {loading && <Text style={styles.loadingText}>Thinking...</Text>}
+        </View>
 
-      <View style={styles.inputRow}>
-        <TextInput
-          style={styles.input}
-          placeholder="Ask something..."
-          value={message}
-          onChangeText={setMessage}
-          editable={!loading}
-        />
-        <TouchableOpacity style={styles.sendBtn} onPress={sendMessage} disabled={loading || !message.trim()}>
-          <Text style={styles.sendBtnText}>Send</Text>
-        </TouchableOpacity>
-      </View>
+        <View style={styles.inputRow}>
+          <TextInput
+            style={styles.input}
+            placeholder="Ask something..."
+            value={message}
+            onChangeText={setMessage}
+            editable={!loading}
+            returnKeyType="send"
+            onSubmitEditing={sendMessage}
+          />
+          <TouchableOpacity style={styles.sendBtn} onPress={sendMessage} disabled={loading || !message.trim()}>
+            <Text style={styles.sendBtnText}>Send</Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -202,5 +214,7 @@ const styles = StyleSheet.create({
   input: { borderWidth: 1, borderColor: "#ccc", borderRadius: 8, padding: 8, flex: 1, marginRight: 8 },
   inputRow: { flexDirection: "row", alignItems: "center", marginTop: 8 },
   error: { color: "red", marginTop: 8 },
+  sendBtn: { backgroundColor: "#2563eb", paddingVertical: 10, paddingHorizontal: 14, borderRadius: 8 },
+  sendBtnText: { color: "#ffffff", fontWeight: "600" },
   errorLight: { color: "#fecaca", marginTop: 8 },
 });
